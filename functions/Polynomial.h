@@ -3,44 +3,63 @@
 #include <iostream>
 using namespace std;
 
-class roman {
-	string value;
-public: 
-	roman(string _value = "") { value = _value; }
-	friend bool operator == (const roman _r1, const roman _r2);
-	void add(string _r) {
-		value += _r;
-	}
-	char GetRom(int i) { return value[i]; }
-	int GetLenRom() { return value.length(); }
-};
-
-struct arabic {
-	int value;
+													// Класс моном
+class monom{
+	double a;
+	long int deg;
 public:
-	arabic(int _value = 0) { value = _value; }
-	friend bool operator == (const arabic _a1, const arabic _a2);
-	void add(int _a) {
-		value += _a;
+	monom(double _a = 1.0, int i = 1, int j = 1, int k = 1) {   //Конструктор монома
+		a = _a;
+		deg = i + 100 * j + 10000 * k;
 	}
-	int GetAr() { return value; }
+	double getA() { return a; }
+	int getK() { int r = deg / 10000; return r; }
+	int getJ() { int r = (deg - (getK() * 10000)) / 100;  return r; }
+	int getI() { int r = deg % 100;  return r; }
+	long int getDeg() { return deg; }
+
+	void setA(double _a) { a = _a; }
+	void setDegree(int _deg) { deg = _deg; }
+	monom operator = (const monom &_m);
+	friend ostream &operator << (ostream &out, const monom &m); 
 };
 
-// I V X  -  M C
 
-class Convertor {
-	roman rm;
-	arabic ar;
-
+										// Вспомогательный класс Node
+class Node
+{
 public:
-	Convertor(roman _rm, arabic _ar) { rm = _rm; ar = _ar; }
-
-	friend arabic toArabic(roman t);
-	friend roman toRoman(arabic t);
-
-	void printRm();
-	void printAr();
-
-	void checkRoman(roman &t);        // IIII - IV							 // оператор ввода-вывода, либо print
-
+	monom value; 
+	Node* next; 
+	Node(monom _value, Node* _next = NULL) {
+		value = _value;
+		next = _next;
+	}
 };
+
+												// Класс полином
+
+class Polynom{
+	Node *first;
+	Node *tail;
+	int count;
+
+	const long int maxDegree = 29*10000 + 29*100 + 29;
+	double *arOfDeg;
+public:
+	Polynom(Node *_first = NULL, Node *_tail = NULL) :first(_first), tail(_tail) { arOfDeg = new double[maxDegree]; count = 0; }
+	~Polynom() { first = NULL; arOfDeg = NULL; }
+	Polynom(const Polynom& _p);
+	int getCount() { return count; }
+	void addM(monom _m);
+	void Print();
+	void SortDeg();
+	void Clear();
+	monom Polynom::operator[](const int index);
+	Polynom operator=(const Polynom& P);
+	const Polynom operator+(const Polynom& RV)const;
+	const Polynom operator-(const Polynom& RV)const;
+	const Polynom operator*(const Polynom& RV)const;
+	double counter(double x, double y, double z);
+};
+

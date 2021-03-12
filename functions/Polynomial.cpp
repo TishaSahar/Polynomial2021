@@ -1,204 +1,252 @@
-#include "RomanToArabic.h"
-
-using namespace std;
+#include "Polynomial.h"
 
 
-void Convertor::checkRoman(roman &t) {
-	
-	for (int i = 0; i < t.GetLenRom(); i++) {
-		int j = i;
-		while (t.GetRom(i) == 'I') {
-			j++;
-		}
-		if (j - i > 3) {
-			throw logic_error("lexical error"); 
-			return;
-		}
-		while (t.GetRom(i) == 'X') {
-			j++;
-		}
-		if (j - i > 3) {
-			throw logic_error("lexical error");
-			return;
-		}
-		while (t.GetRom(i) == 'C') {
-			j++;
-		}
-		if (j - i > 3) {
-			throw logic_error("lexical error");
-			return;
-		}
+monom monom::operator = (const monom &_m) {							//Оператор присваивания
+	a = _m.a;
+	deg = _m.deg;
+	return *this;
+}
+ostream &operator << (ostream &out, const monom &m) {			    //Перегрузка потока вывода
+	int k = (m.deg / 10000); int j = (m.deg - (k * 10000)) / 100; int i = m.deg % 100;
+	out << m.a << "(x^" << i << ")(y^" << j << ")(z^" << k << ") ";
+	return out;
+}
 
-		while (t.GetRom(i) == 'M') {
-			j++;
-		}
-		if (j - i > 3)
+Polynom::Polynom(const Polynom& _p) {//Конструктор копирования
+	Node* node = _p.first;
+	while (node->next != NULL) {
+		this->addM(node->value);
+		node = node->next;
+	}
+}
+
+void Polynom::Clear()
+{
+	if (this->first != NULL)
+	{
+		Node* node = this->first;
+		Node* next;
+		while (node != NULL)
 		{
-			throw logic_error("lexical error");
+			next = node->next;
+			delete node;
+			node = next;
+		}
+		this->first = NULL;
+	}
+	count = 0;
+}
+
+void Polynom::Print() {				//Печать полинома	
+	if (this->count == 0)
+	{
+		cout << "Polynom is empty" << endl;
+		return;
+	}
+
+	Node* node = this->first;
+	cout << "f(x,y,z) = ";
+	while (node != NULL) {
+		if (node->next == NULL) {
+			cout << node->value << endl;
+			system("pause");
 			return;
 		}
-		i = j;
+		cout << node->value;
+		if (node->next->value.getA() > 0) cout << "+ ";
+		//else cout << " ";
+		node = node->next;
 	}
+	return;
 }
 
-arabic toArabic(roman t) {
-	->checkRoman(t);
-	arabic res;
-	res.value = 0;
-	int i = 0;
+void Polynom::addM(monom _m) {		//Добавление монома в конец полинома
+	Node* node = new Node(_m, NULL);
+	if (this->first == NULL)
+		this->first = node;
+	else
+		this->tail->next = node;
+	this->tail = node;
+	count++;
+}
 
-	while (t.GetRom(i) == 'M') {
-		res.value += 1000;		
-		i++;
+void Polynom::SortDeg() {
+	Node* node = this->first;
+	monom *ar = new monom[count];
+	int k = 0;
+	while (node != NULL) {
+		ar[k] = node->value;
+		node = node->next;
+		k++;
 	}
 
-	if (t.GetRom(i) == 'C') {
-		if (t.GetRom(i + 1) == 'M') {
-			res.value += 900;
-			i += 2;			}
-		else
-			if (t.GetRom(i + 1) == 'D') {
-				res.value += 400;
-				i += 2;
+	for (int i = 0; i < k; i++)
+		for (int j = i; j < k - 1; j++)
+			if (ar[i].getDeg() > ar[i + 1].getDeg()) {
+				monom t = ar[i];
+				ar[i] = ar[j];
+				ar[j] = t;
 			}
-			else {
-				res.value += 100;
-				i++;
-			}
-	}
-	if (t.GetRom(i) == 'D') {
-		res.value += 500;
-		i++;
-	}
-	while (t.GetRom(i) == 'C') {
-		res.value += 100;
-		i++;
-	}
-	if (t.GetRom(i) == 'X') {
-		if (t.GetRom(i + 1) == 'C') {
-			res.value += 90;
-			i += 2;
+
+	this->Clear();
+	for (int i = 0; i < k; i++)
+		this->addM(ar[i]);
+}
+
+const Polynom Polynom::operator+(const Polynom& RV)const {
+	Node *left = first;
+	Node *right = RV.first;
+
+	Polynom Res;
+
+	while ((left != NULL) && (right != NULL)) {
+		if (left->value.getDeg() > right->value.getDeg())
+			Res.addM(right->value);
+		if (left->value.getDeg() == right->value.getDeg()) {
+			double a = left->value.getA() + right->value.getA();
+			int i = left->value.getI();
+			int j = left->value.getJ();
+			int k = left->value.getK();
+			monom m(a, i, j, k);
+			Res.addM(m);
 		}
-		else
-			if (t.GetRom(i + 1) == 'L') {
-				res.value += 40;
-				i += 2;
-			}
-			else {
-				res.value += 10;
-				i++;
-			}
-	}
-	if (t.GetRom(i) == 'L') {
-		res.value += 50;
-		i++;
-	}
-	while (t.GetRom(i) == 'X') {
-		res.value += 10;
-		i++;
-	}
-	if (t.GetRom(i) == 'I') {
-		if (t.GetRom(i + 1) == 'X') {
-			res.value += 9;
-			i += 2;
+		else {
+			Res.addM(left->value);
 		}
-		else
-			if (t.GetRom(i+1) == 'V') {
-				res.value += 4;
-				i += 2;
-			}
-			else {
-				res.value += 1;
-				i++;
-			}
+		left = left->next;
+		right = right->next;
 	}
-	if (t.GetRom(i) == 'V') {
-		res.value += 5;
-		i += 1;
+
+	while (right != NULL) {
+		double a = right->value.getA();
+		int i = right->value.getI();
+		int j = right->value.getJ();
+		int k = right->value.getK();
+		monom m(a, i, j, k);
+		Res.addM(m);
+		right = right->next;
 	}
-	while (t.GetRom(i) == 'I') {
-		res.value += 1;
-		i++;
+	while (left != NULL) {
+		double a = left->value.getA();
+		int i = left->value.getI();
+		int j = left->value.getJ();
+		int k = left->value.getK();
+		monom m(a, i, j, k);
+		Res.addM(m);
+		left = left->next;
 	}
+
+	return Res;
+}
+
+const Polynom Polynom::operator-(const Polynom& RV)const {
+	Node *left = first;
+	Node *right = RV.first;
+
+	Polynom Res;
+
+	while ((left != NULL) && (right != NULL)) {
+		if (left->value.getDeg() > right->value.getDeg())
+			Res.addM(right->value);
+		if (left->value.getDeg() == right->value.getDeg()) {
+			double a = left->value.getA() - right->value.getA();
+			int i = left->value.getI();
+			int j = left->value.getJ();
+			int k = left->value.getK();
+			monom m(a, i, j, k);
+			Res.addM(m);
+		}
+		else {
+			Res.addM(left->value);
+		}
+		left = left->next;
+		right = right->next;
+	}
+
+	while (right != NULL) {
+		double a = right->value.getA();
+		int i = right->value.getI();
+		int j = right->value.getJ();
+		int k = right->value.getK();
+		monom m(a, i, j, k);
+		Res.addM(m);
+		right = right->next;
+	}
+	while (left != NULL) {
+		double a = left->value.getA();
+		int i = left->value.getI();
+		int j = left->value.getJ();
+		int k = left->value.getK();
+		monom m(a, i, j, k);
+		Res.addM(m);
+		left = left->next;
+	}
+
+	return Res;
+}
+
+const Polynom Polynom::operator*(const Polynom& RV)const {
+	Polynom Res;
+	Node* left = first;
+	Node* right = RV.first;
+
+	while (left != NULL) {
+		Node* right = RV.first;
+		while (right != NULL) {
+			double a = (left->value.getA() * right->value.getA());
+			int i = left->value.getI() + right->value.getI();
+			int j = left->value.getJ() + right->value.getJ();
+			int k = left->value.getK() + right->value.getK();
+			monom m(a, i, j, k);
+			Res.addM(m);
+			right = right->next;
+		}
+		left = left->next;
+	}
+
+	return Res;
+}
+
+Polynom Polynom::operator=(const Polynom& P) {
+	if (this->first == NULL) {
+		first = P.first;
+		tail = P.tail;
+		count = P.count;
+	}
+	else {
+		this->Clear();
+		first = P.first;
+		tail = P.tail;
+		count = P.count;
+	}
+	return *this;
+}
+
+monom Polynom::operator[](const int index) {
+	if (index >= count)
+		throw logic_error("Index out of the range");
+	else {
+		int counter = 0;
+		Node* node = first;
+		while (counter++ != index)
+			node = node->next;
+
+		return node->value;
+	}
+}
+
+double Polynom::counter(double x0, double y0, double z0) {
+	Node *node = first;
+	double res = 0.0;
+
+	while (node != NULL) {
+		double x = pow(x0, node->value.getI());
+		double y = pow(y0, node->value.getJ());
+		double z = pow(z0, node->value.getK());
+		double a = node->value.getA();
+		res += a*x*y*z;
+		node = node->next;
+	}
+
 	return res;
-}
-
-roman toRoman(arabic t) {
-	roman res;
-	int val = t.value;
-
-	while (val > 1000) {
-		res.add("M");
-		val -= 1000;
-	}
-	
-	if (val / 900 > 0) {
-		res.add("CM");
-		val -= 900;
-	}
-	if (val / 500 > 0) {
-		res.add("D");
-		val -= 500;
-	}
-	if (val / 400 > 0) {
-		res.add("CD");
-		val -= 400;
-	}
-	
-	while (val > 100) {
-		res.add("C");
-		val -= 100;
-	}
-
-	if (val / 90 > 0) {
-		res.add("XC");
-		val -= 90;
-	}
-	if (val / 50 > 0) {
-		res.add("L");
-		val -= 50;
-	}
-	if (val / 40 > 0) {
-		res.add("XL");
-		val -= 40;
-	}
-
-	while (val > 10) {
-		res.add("X");
-		val -= 10;
-	}
-
-	if (val / 9 > 0) {
-		res.add("IX");
-		val -= 9;
-	}
-	if (val / 5 > 0) {
-		res.add("V");
-		val -= 5;
-	}
-	if (val / 4 > 0) {
-		res.add("IV");
-		val -= 4;
-	}
-
-	while (val > 0) {
-		res.add("I");
-		val -= 1;
-	}
-
-	return res;
-}
-
-void Convertor::printAr() {
-	cout << ar.value << endl;
-}
-
-bool operator == (const roman _r1, const roman _r2) {
-	if (_r1.value != _r2.value) return false;
-	else return true;
-}
-
-bool operator == (const arabic _a1, const arabic _a2) {
-	if (_a1.value != _a2.value) return false;
-	else return true;
 }
