@@ -62,3 +62,38 @@ TEST(polynom_tests, can_count_polynom) {
 	double res = 13.0;
 	EXPECT_EQ(res, P.counter(1, 1, 1));
 }
+
+TEST(polynom_tests, operator_add_test) {
+	monom m1(3.14, 1, 2, 3);
+	monom m2(9.86, 3, 2, 3);
+	monom m3(1.26, 3, 2, 1);
+
+	Polynom P; P.addM(m1); P.addM(m2); P.SortDeg();
+	Polynom P1; P1.addM(m2); P1.addM(m3); P1.SortDeg();
+	Polynom R = P + P1; //R.SortDeg();
+	
+	
+	monom m22(19.72, 3, 2, 3);
+	Polynom R1; R1.addM(m3); R1.addM(m1); R1.addM(m22);
+	EXPECT_EQ(R, R1);
+}
+
+TEST(polynom_tests, operator_sub_test) {
+	monom m1(3.14, 1, 2, 3);
+	monom m2(0.0, 3, 2, 3);
+	monom m3(-1.26, 3, 2, 1);
+
+	Polynom P; P.addM(m1); P.addM(m2); P.SortDeg();
+	Polynom P1; P1.addM(m2); P1.addM(m3); P1.SortDeg();
+	Polynom R = P - P1; //R.SortDeg();
+
+	monom m32(-1.26, 3, 2, 1);
+	Polynom R1; R1.addM(m3); R1.addM(m1); //R1.SortDeg();
+	EXPECT_EQ(R, R1);
+}
+
+TEST(polynom_tests, pause) {
+	bool t = true;
+	system("pause");
+	EXPECT_EQ(t, true);
+}

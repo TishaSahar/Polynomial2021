@@ -7,10 +7,12 @@ using namespace std;
 class monom{
 	double a;
 	long int deg;
+	const int maxDegree = 29 * 10000 + 29 * 100 + 29;
 public:
 	monom(double _a = 1.0, int i = 1, int j = 1, int k = 1) {   //Конструктор монома
 		a = _a;
 		deg = i + 100 * j + 10000 * k;
+		if (deg > maxDegree) throw logic_error("deg > 30");
 	}
 	double getA() { return a; }
 	int getK() { int r = deg / 10000; return r; }
@@ -22,6 +24,7 @@ public:
 	void setDegree(int _deg) { deg = _deg; }
 	monom operator = (const monom &_m);
 	friend ostream &operator << (ostream &out, const monom &m); 
+	friend bool operator != (monom& l, monom& r);
 };
 
 
@@ -42,13 +45,11 @@ public:
 class Polynom{
 	Node *first;
 	Node *tail;
-	int count;
 
-	const long int maxDegree = 29*10000 + 29*100 + 29;
-	double *arOfDeg;
 public:
-	Polynom(Node *_first = NULL, Node *_tail = NULL) :first(_first), tail(_tail) { arOfDeg = new double[maxDegree]; count = 0; }
-	~Polynom() { first = NULL; arOfDeg = NULL; }
+	int count;
+	Polynom(Node *_first = NULL, Node *_tail = NULL) :first(_first), tail(_tail) { count = 0; }
+	~Polynom() { first = NULL; }
 	Polynom(const Polynom& _p);
 	int getCount() { return count; }
 	void addM(monom _m);
@@ -60,6 +61,7 @@ public:
 	const Polynom operator+(const Polynom& RV)const;
 	const Polynom operator-(const Polynom& RV)const;
 	const Polynom operator*(const Polynom& RV)const;
+	friend bool operator == (const Polynom& l, const Polynom& r);
 	double counter(double x, double y, double z);
 };
 
