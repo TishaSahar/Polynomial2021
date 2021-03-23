@@ -45,14 +45,16 @@ TEST(polynom_tests, can_sort_monoms_in_polynom) {
 	ASSERT_NO_THROW(P.SortDeg());
 }
 
-/*TEST(polynom_tests, sort_polynom_is_sorting) {
+TEST(polynom_tests, sort_polynom_is_sorting) {
 	monom m1(3.14, 1, 2, 3);
 	monom m2(9.96, 3, 2, 0);
 	monom m3(1.26, 3, 2, 1);
 
-	Polynom P; P.addM(m1); P.addM(m2); P.addM(m1); P.addM(m3);
+	Polynom P; P.addM(m1); P.addM(m2); P.addM(m3);
 	P.SortDeg();
-}*/
+	Polynom P1; P1.addM(m2); P1.addM(m3); P1.addM(m1);
+	EXPECT_EQ(P, P1);
+}
 
 TEST(polynom_tests, can_count_polynom) {
 	monom m1(3.14, 1, 2, 3);
@@ -83,13 +85,38 @@ TEST(polynom_tests, operator_sub_test) {
 	monom m2(0.0, 3, 2, 3);
 	monom m3(-1.26, 3, 2, 1);
 
+	Polynom P; P.addM(m1); P.SortDeg();
+	Polynom P1; P1.addM(m3); P1.SortDeg();
+	Polynom R = P - P1; R.SortDeg();
+
+	monom m32(1.26, 3, 2, 1);
+	Polynom R1; R1.addM(m32); R1.addM(m1); R1.SortDeg();
+	EXPECT_EQ(R, R1);
+}
+
+TEST(polynom_tests, operator_mul_test) {
+	monom m1(3.14, 1, 2, 3);
+	monom m2(0.0, 3, 2, 3);
+	monom m3(1.0, 3, 2, 1);
+
 	Polynom P; P.addM(m1); P.addM(m2); P.SortDeg();
 	Polynom P1; P1.addM(m2); P1.addM(m3); P1.SortDeg();
-	Polynom R = P - P1; //R.SortDeg();
+	Polynom R = P * P1; R.SortDeg();
 
-	monom m32(-1.26, 3, 2, 1);
-	Polynom R1; R1.addM(m3); R1.addM(m1); //R1.SortDeg();
+	monom m13(3.14, 4, 4, 4);
+	Polynom R1; R1.addM(m13);
 	EXPECT_EQ(R, R1);
+}
+
+TEST(polynom_tests, operator_mul_pol_on_const_test) {
+	monom m1(3.14, 1, 2, 3);
+	monom m3(1.0, 3, 2, 1);
+	monom m11(-3.14, 1, 2, 3);
+	monom m33(-1.0, 3, 2, 1);
+	Polynom P; P.addM(m1); P.addM(m3); P.SortDeg();
+	P = P*(-1.0);
+	Polynom P1; P1.addM(m11); P1.addM(m33); P1.SortDeg();
+	EXPECT_EQ(P, P1);
 }
 
 TEST(polynom_tests, pause) {

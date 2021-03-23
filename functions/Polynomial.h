@@ -61,7 +61,9 @@ public:
 	const Polynom operator+(const Polynom& RV)const;
 	const Polynom operator-(const Polynom& RV)const;
 	const Polynom operator*(const Polynom& RV)const;
+	const Polynom operator*(const double RV)const;
 	friend bool operator == (const Polynom& l, const Polynom& r);
 	double counter(double x, double y, double z);
+
 };
 

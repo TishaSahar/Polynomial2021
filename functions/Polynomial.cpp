@@ -13,8 +13,7 @@ ostream &operator << (ostream &out, const monom &m) {			    //Перегрузка потока 
 }
 
 bool operator != (monom& l, monom& r) {
-	bool const eps = 0.000000001;
-	if ((l.getA() - r.getA() > eps) || (l.getA() - r.getA() < eps)) {
+	if (l.getA() - r.getA() != 0.0) {
 		return true;
 	}
 	if (l.getDeg() != r.getDeg()) {
@@ -28,7 +27,7 @@ Polynom::Polynom(const Polynom& _p) {//Конструктор копирования
 	Node* node = _p.first;
 	first = _p.first;
 	tail = _p.first;
-	count = _p.count;
+	count = 1;
 	node = node->next;
 	while (node != NULL) {
 		this->addM(node->value);
@@ -100,19 +99,19 @@ void Polynom::SortDeg() {
 
 	for (int i = 0; i < k; i++)
 		for (int j = i; j < k - 1; j++) {
-			if (ar[i].getDeg() > ar[i + 1].getDeg()) {
-				monom t = ar[i];
-				ar[i] = ar[j];
-				ar[j] = t;
-			}
-			if (ar[i].getDeg() == ar[i + 1].getDeg()){
-				double a = ar[i].getA() + ar[j].getA();
-				monom t1(a, ar[i].getI(), ar[i].getJ(), ar[i].getK());
-				monom t2(0.0, 0, 0, 0);
-				ar[i] = t1; ar[j] = t2;
+			if (ar[j].getDeg() > ar[j + 1].getDeg()) {
+				monom t = ar[j];
+				ar[j] = ar[j+1];
+				ar[j+1] = t;
 			}
 		}
-
+	for(int i = 0; i < k-1; i ++)
+		if (ar[i].getDeg() == ar[i + 1].getDeg()) {
+			double a = ar[i].getA() + ar[i+1].getA();
+			monom t1(a, ar[i].getI(), ar[i].getJ(), ar[i].getK());
+			monom t2(0.0, 0, 0, 0);
+			ar[i+1] = t1; ar[i] = t2;
+		}
 	this->Clear();
 	for (int i = 0; i < k; i++)
 		this->addM(ar[i]);
@@ -168,52 +167,9 @@ const Polynom Polynom::operator-(const Polynom& RV)const {
 	Node *left = first;
 	Node *right = RV.first;
 
-	Polynom Res;
+	Polynom Res = *this;
 
-	while ((left != NULL) && (right != NULL)) {
-		if (left->value.getDeg() > right->value.getDeg()) {
-			double a = -right->value.getA();
-			int i = left->value.getI();
-			int j = left->value.getJ();
-			int k = left->value.getK();
-			monom m(a, i, j, k);
-			Res.addM(m);
-		}
-		if (left->value.getDeg() == right->value.getDeg()) {
-			double a = left->value.getA() - right->value.getA();
-			if (a != 0) {
-				int i = left->value.getI();
-				int j = left->value.getJ();
-				int k = left->value.getK();
-				monom m(a, i, j, k);
-				Res.addM(m);
-			}
-		}
-		else {
-			Res.addM(left->value);
-		}
-		left = left->next;
-		right = right->next;
-	}
-
-	while (right != NULL) {
-		double a = right->value.getA();
-		int i = right->value.getI();
-		int j = right->value.getJ();
-		int k = right->value.getK();
-		monom m(a, i, j, k);
-		Res.addM(m);
-		right = right->next;
-	}
-	while (left != NULL) {
-		double a = left->value.getA();
-		int i = left->value.getI();
-		int j = left->value.getJ();
-		int k = left->value.getK();
-		monom m(a, i, j, k);
-		Res.addM(m);
-		left = left->next;
-	}
+	Res = Res + (RV*(-1.0));
 
 	return Res;
 }
@@ -282,6 +238,19 @@ double Polynom::counter(double x0, double y0, double z0) {
 	}
 
 	return res;
+}
+
+const Polynom Polynom::operator*(const double RV)const {
+	Polynom Res;
+	if (this->count == 0) return Res;
+	Node *left = first;
+	while (left != NULL) {
+		double _a = RV*left->value.getA();
+		monom _m(_a, left->value.getI(), left->value.getJ(), left->value.getK());
+		Res.addM(_m);
+		left = left->next;
+	}
+	return Res;
 }
 
 bool operator == (const Polynom& l, const Polynom& r) {
