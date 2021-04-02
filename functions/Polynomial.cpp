@@ -24,9 +24,8 @@ bool operator != (monom& l, monom& r) {
 
 
 Polynom::Polynom(const Polynom& _p) {//Конструктор копирования
-	Node* node = _p.first;
-	first = _p.first;
-	tail = _p.first;
+	Node* node = new Node(_p.first->value, _p.first->next);
+	tail = first = new Node(_p.first->value, _p.first->next);
 	count = 1;
 	node = node->next;
 	while (node != NULL) {
@@ -118,58 +117,61 @@ void Polynom::SortDeg() {
 }
 
 const Polynom Polynom::operator+(const Polynom& RV)const {
-	Node *left = first;
-	Node *right = RV.first;
+	Node *left = first; monom *ml = new monom[this->count];
+	Node *right = RV.first;monom *mr = new monom[RV.count];
 
-	Polynom Res;
-
-	while ((left != NULL) && (right != NULL)) {
-		if (left->value.getDeg() > right->value.getDeg())
-			Res.addM(right->value);
-		if (left->value.getDeg() == right->value.getDeg()) {
-			double a = left->value.getA() + right->value.getA();
-			int i = left->value.getI();
-			int j = left->value.getJ();
-			int k = left->value.getK();
-			monom m(a, i, j, k);
-			Res.addM(m);
-		}
-		else {
-			Res.addM(left->value);
-		}
-		left = left->next;
-		right = right->next;
-	}
-
+	int i = 0;
 	while (right != NULL) {
-		double a = right->value.getA();
-		int i = right->value.getI();
-		int j = right->value.getJ();
-		int k = right->value.getK();
-		monom m(a, i, j, k);
-		Res.addM(m);
+		mr[i] = right->value;
+		i++;
 		right = right->next;
 	}
+	int j = 0;
 	while (left != NULL) {
-		double a = left->value.getA();
-		int i = left->value.getI();
-		int j = left->value.getJ();
-		int k = left->value.getK();
-		monom m(a, i, j, k);
-		Res.addM(m);
+		ml[j] = left->value;
+		j++;
 		left = left->next;
 	}
 
+	int maxind = i + j;
+	i = j = 0;
+
+	monom *res = new monom[maxind];
+
+	int k = 0;
+	while ((i + j) < maxind) {
+		if (mr[i].getDeg() < ml[j].getDeg()) {
+			res[k] = mr[i];
+			k++;
+			i++;
+		}
+		else
+			if(mr[i].getDeg() == ml[j].getDeg()) {
+				double a = mr[i].getA() + ml[j].getA();
+				monom t(a, mr[i].getI(), mr[i].getJ(), mr[i].getK());
+				res[k] = t;
+				k++; maxind--;
+				i++; j++;
+			}
+			else
+				if (mr[i].getDeg() > ml[j].getDeg()) {
+					res[k] = ml[j];
+					k++;
+					j++;
+				}
+	}
+	Polynom Res;
+	for (int ind = 0; ind < maxind; ind++) {
+		Res.addM(res[ind]);
+	}
+ 
 	return Res;
 }
 
 const Polynom Polynom::operator-(const Polynom& RV)const {
-	Node *left = first;
-	Node *right = RV.first;
+	Polynom Res(*this + (RV*(-1.0)));
 
-	Polynom Res = *this;
 
-	Res = Res + (RV*(-1.0));
 
 	return Res;
 }
@@ -192,21 +194,19 @@ const Polynom Polynom::operator*(const Polynom& RV)const {
 		}
 		left = left->next;
 	}
-
+	
+	Res.SortDeg();
 	return Res;
 }
 
-Polynom Polynom::operator=(const Polynom& P) {
-	if (this->first == NULL) {
-		first = P.first;
-		tail = P.tail;
-		count = P.count;
-	}
-	else {
-		this->Clear();
-		first = P.first;
-		tail = P.tail;
-		count = P.count;
+Polynom Polynom::operator=(const Polynom& _p) {
+	Node* node = new Node(_p.first->value, _p.first->next);
+	tail = first = new Node(_p.first->value, _p.first->next);
+	count = 1;
+	node = node->next;
+	while (node != NULL) {
+		this->addM(node->value);
+		node = node->next;
 	}
 	return *this;
 }

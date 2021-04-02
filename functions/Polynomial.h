@@ -38,6 +38,11 @@ public:
 		value = _value;
 		next = _next;
 	}
+
+	Node operator = (const Node &N) {
+		value = N.value;
+		next = N.next;
+	}
 };
 
 												// Класс полином

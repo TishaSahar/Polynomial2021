@@ -72,7 +72,7 @@ TEST(polynom_tests, operator_add_test) {
 
 	Polynom P; P.addM(m1); P.addM(m2); P.SortDeg();
 	Polynom P1; P1.addM(m2); P1.addM(m3); P1.SortDeg();
-	Polynom R = P + P1; //R.SortDeg();
+	Polynom R = P + P1;
 	
 	
 	monom m22(19.72, 3, 2, 3);
@@ -87,10 +87,10 @@ TEST(polynom_tests, operator_sub_test) {
 
 	Polynom P; P.addM(m1); P.SortDeg();
 	Polynom P1; P1.addM(m3); P1.SortDeg();
-	Polynom R = P - P1; R.SortDeg();
+	Polynom R(P - P1); //R.Print();
 
 	monom m32(1.26, 3, 2, 1);
-	Polynom R1; R1.addM(m32); R1.addM(m1); R1.SortDeg();
+	Polynom R1; R1.addM(m32); R1.addM(m1);
 	EXPECT_EQ(R, R1);
 }
 
